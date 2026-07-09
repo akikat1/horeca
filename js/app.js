@@ -40,12 +40,15 @@
     var menu = document.getElementById('nav-menu');
     var mobile = document.getElementById('mobile-menu');
     var dHTML = '', mHTML = '';
+    var ddIdx = 0;
 
     NAV_ITEMS.forEach(function(item) {
       if (item.children) {
+        var ddId = 'dd-' + (ddIdx++);
         dHTML += '<div class="nav__dropdown">';
-        dHTML += '<a class="nav__item nav__item--dropdown" href="javascript:void(0)">' + item.label + ' ▾</a>';
-        dHTML += '<div class="nav__dropdown-menu">';
+        // Use <button> — no href issues, no hashchange side effects
+        dHTML += '<button class="nav__item nav__item--dropdown" type="button" data-dd="' + ddId + '">' + item.label + ' ▾</button>';
+        dHTML += '<div class="nav__dropdown-menu" id="' + ddId + '">';
         item.children.forEach(function(c){
           dHTML += '<a class="nav__dropdown-item" href="' + c.href + '" data-nav="' + c.id + '">' + c.label + '</a>';
           mHTML += '<a class="nav__mobile-item" href="' + c.href + '" data-nav="' + c.id + '">' + c.label + '</a>';
@@ -60,29 +63,40 @@
     menu.innerHTML = dHTML;
     mobile.innerHTML = mHTML;
 
-    // Dropdown click toggle (works on desktop AND mobile)
-    var dd = menu.querySelectorAll('.nav__dropdown');
-    dd.forEach(function(d){
-      var btn = d.querySelector('.nav__item--dropdown');
-      var ddMenu = d.querySelector('.nav__dropdown-menu');
+    // Dropdown: toggle CSS class .open (not inline style — avoids the style.display comparison bug)
+    menu.querySelectorAll('.nav__item--dropdown').forEach(function(btn){
       btn.addEventListener('click', function(e){
         e.stopPropagation();
-        var isOpen = ddMenu.style.display === 'flex';
-        // Close all other dropdowns
-        menu.querySelectorAll('.nav__dropdown-menu').forEach(function(m){ m.style.display = 'none'; });
-        ddMenu.style.display = isOpen ? 'none' : 'flex';
+        var ddId = btn.getAttribute('data-dd');
+        var ddMenu = document.getElementById(ddId);
+        var wasOpen = ddMenu.classList.contains('open');
+        // Close all first
+        menu.querySelectorAll('.nav__dropdown-menu').forEach(function(m){ m.classList.remove('open'); });
+        // Then open this one (if it was closed)
+        if (!wasOpen) ddMenu.classList.add('open');
       });
-    });
-
-    // Close dropdown on outside click
-    document.addEventListener('click', function(){
-      menu.querySelectorAll('.nav__dropdown-menu').forEach(function(m){ m.style.display = 'none'; });
     });
   }
 
+  // Global outside-click listener (registered once, not inside buildNav)
+  document.addEventListener('click', function(){
+    document.querySelectorAll('.nav__dropdown-menu').forEach(function(m){ m.classList.remove('open'); });
+  });
+
   // Add dropdown styles dynamically
   var ddStyle = document.createElement('style');
-  ddStyle.textContent = '.nav__dropdown{position:relative}.nav__dropdown-menu{display:none;position:absolute;top:calc(100% + 8px);left:0;flex-direction:column;background:rgba(8,12,20,0.98);border:1px solid var(--border);border-radius:var(--radius-md);padding:8px;min-width:200px;box-shadow:var(--shadow-card);z-index:200;animation:fadeIn .15s ease-out}.nav__dropdown-item{padding:10px 16px;border-radius:var(--radius-sm);font-size:.88rem;color:var(--text-secondary);white-space:nowrap;transition:all var(--transition);display:block}.nav__dropdown-item:hover{color:var(--accent-amber);background:var(--bg-glass-hover)}.nav__item--dropdown{cursor:pointer;user-select:none}';
+  ddStyle.textContent = [
+    '.nav__dropdown{position:relative}',
+    '.nav__dropdown-menu{display:none;flex-direction:column;position:absolute;top:calc(100% + 10px);left:0;',
+    'background:rgba(8,12,20,0.98);border:1px solid rgba(255,255,255,0.1);border-radius:12px;',
+    'padding:8px;min-width:210px;box-shadow:0 8px 32px rgba(0,0,0,0.5);z-index:999}',
+    '.nav__dropdown-menu.open{display:flex}',  /* <-- class toggle, not inline style */
+    '.nav__dropdown-item{padding:10px 16px;border-radius:8px;font-size:.88rem;color:#94a3b8;',
+    'white-space:nowrap;transition:color .2s,background .2s;display:block;text-decoration:none}',
+    '.nav__dropdown-item:hover{color:#f59e0b;background:rgba(255,255,255,0.06)}',
+    '.nav__item--dropdown{cursor:pointer;user-select:none;background:none;border:none;',
+    'color:inherit;font:inherit;padding:0;letter-spacing:inherit}'
+  ].join('');
   document.head.appendChild(ddStyle);
 
   // ── FOOTER ─────────────────────────────────────────────
