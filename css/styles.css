@@ -135,7 +135,7 @@ h4 { font-size: 1.1rem; }
 .nav__logo span { color: var(--accent-amber); }
 .nav__logo:hover { color: var(--text-primary); }
 
-.nav__menu { display: flex; align-items: center; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+.nav__menu { display: flex; align-items: center; gap: 8px; overflow: visible; scrollbar-width: none; }
 .nav__menu::-webkit-scrollbar { display: none; }
 
 .nav__item {
