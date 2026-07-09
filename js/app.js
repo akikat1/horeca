@@ -95,7 +95,7 @@
     'white-space:nowrap;transition:color .2s,background .2s;display:block;text-decoration:none}',
     '.nav__dropdown-item:hover{color:#f59e0b;background:rgba(255,255,255,0.06)}',
     '.nav__item--dropdown{cursor:pointer;user-select:none;background:none;border:none;',
-    'color:inherit;font:inherit;padding:0;letter-spacing:inherit}'
+    'color:inherit;font-family:inherit;font-size:0.85rem;font-weight:500;padding:0;letter-spacing:inherit}'
   ].join('');
   document.head.appendChild(ddStyle);
 
